@@ -168,7 +168,9 @@ export function grantHint(label: string, kind: 'app' | 'cli', accessibility: boo
   return `Enable ${missing.join(' and ')} for ${who} in System Settings → Privacy & Security, then restart dsh.${cli} Do not grant CuaDriver.app for this plugin.`
 }
 
-export function permissionsHint(state: HostPermissions): string {
+export function permissionsHint(
+  state: Pick<HostPermissions, 'accessibility' | 'screenRecording' | 'hint'>,
+): string {
   if (process.platform !== 'darwin') return ''
   if (state.accessibility && state.screenRecording) return state.hint
   return state.hint

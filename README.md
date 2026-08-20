@@ -1,4 +1,4 @@
-# dsh-cuadrive-mac
+# CUA Drive for DeepSeek Harness
 
 **macOS-only** DeepSeek Harness plugin that gives the in-host agent its own computer-use runtime.
 
@@ -10,7 +10,11 @@
 
 Windows and Linux are not supported. On those OSes the plugin loads `cua_status` and explains it is macOS-only; it does not download a driver or start a daemon.
 
-It is meant to be cloned into a Harness checkout and used as-is:
+The installable package is named `dsh-cua-drive`. The repository and private
+runtime state keep the legacy name `dsh-cuadrive-mac` so existing downloads,
+permissions, sockets, and sessions continue working without migration.
+
+The plugin can be installed directly from GitHub:
 
 - **No Cua install on the machine:** first DSH start downloads the lock-pinned official `cua-driver` into `$DSH_HOME/dsh-cuadrive-mac/vendor/` and runs it.
 - **Cua already installed:** this plugin still uses that private copy and a **private socket**. It does not `stop` the default daemon, does not write to `/Applications`, `~/.local/bin`, or `cua-driver skills install`.
@@ -20,14 +24,27 @@ Other agents keep their own cua-driver. Closing DSH only stops `$DSH_HOME/dsh-cu
 ## Install
 
 ```sh
-cd <harness>/my-plugins
-git clone https://github.com/aa2246740/dsh-cuadrive-mac.git
-cd ..
-pnpm dshx check dsh-cuadrive-mac
-pnpm dshx start web dsh-cuadrive-mac
+dsh plugin --profile web add github:aa2246740/dsh-cuadrive-mac#<commit>
 ```
 
-Works with **DSH.app** and with CLI `dsh web` / `dshx start` (no app pack). Then restart DSH and open a **new** chat. Do not Continue a session that already 400'd.
+The repository commits its built `lib/` output, so a GitHub install does not run
+an install-time `prepare` script. Pin a commit SHA as shown above, restart DSH,
+and open a **new** chat. It works with **DSH.app** and CLI `dsh web`.
+
+For local development, clone anywhere outside the Harness repository and install
+the checkout from its own directory:
+
+```sh
+npm ci
+npm test
+npm run typecheck
+npm run build
+dsh plugin --profile web add .
+```
+
+If upgrading from the old `my-plugins` instructions, first remove the
+`dsh-cuadrive-mac` insert from the profile's `cordis.patch.yml`. The Bundle now
+owns that Loader row; keeping both copies causes a duplicate Loader id at boot.
 
 First boot needs network once (GitHub Releases) unless you drop the exact tarball at `runtime.manualCachePath`.
 
@@ -83,10 +100,12 @@ Skill files under `skill/` are the official pack for the locked driver. The cata
 
 ## Tests
 
-From a DeepSeek Harness checkout:
+From this repository:
 
 ```sh
-node --import tsx/esm --test --test-concurrency=1 my-plugins/dsh-cuadrive-mac/tests/*.spec.ts
+npm test
+npm run typecheck
+npm run build
 ```
 
 ## Why not `@deepseek-ai/dsh-mcp-client` alone?

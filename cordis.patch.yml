@@ -1,0 +1,5 @@
+# Installable profile layer. The bare package specifier is intentional: DSH's
+# plugin inventory displays this value instead of leaking the local checkout path.
+- insert:
+    - id: dsh-cuadrive-mac
+      name: dsh-cua-drive

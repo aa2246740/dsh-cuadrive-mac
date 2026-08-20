@@ -1,6 +1,6 @@
 import type { ContentBlock } from '@deepseek-ai/dsh-llm'
 import type { JsonValue } from '@deepseek-ai/dsh-session'
-import type { JsonSchemaNode } from '@deepseek-ai/dsh-tools'
+import type { JsonSchemaNode, ValueSchemaSpec } from '@deepseek-ai/dsh-tools'
 import { imageRefFromValue, type CuaImageValue } from './images.ts'
 
 /** Canonical value every cua_* driver call returns. */
@@ -22,7 +22,7 @@ const IMAGE_PROPERTIES = {
   width: { type: 'integer' as const, required: true },
   height: { type: 'integer' as const, required: true },
   name: { type: 'string' as const },
-}
+} as const
 
 /** defineTool DSL for host tools (`cua_call`). */
 export const CUA_OUTPUT_DSL = {
@@ -42,7 +42,7 @@ export const CUA_OUTPUT_DSL = {
       },
     },
   },
-}
+} as const satisfies ValueSchemaSpec
 
 /** Raw JSON Schema for `ctx.tools.register` (assertSupportedJsonSchema). */
 export const CUA_OUTPUT_JSON: JsonSchemaNode = {

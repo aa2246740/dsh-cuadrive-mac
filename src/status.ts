@@ -1,11 +1,12 @@
 import type { ResolvedConfig } from './config.ts'
+import type { JsonValue } from '@deepseek-ai/dsh-session'
 import { readDaemonStatus, readDoctor, readPermissions, resolveBinary } from './driver.ts'
 import { permissionsHint, readHostPermissions } from './permissions.ts'
 import { readRuntimeStatus, resolvedProxy, runtimeAvailable } from './runtime.ts'
 import { resolveSkillDir } from './skill.ts'
 
 /** Same payload `cua_status` returns. Must be DSH lossless JSON (no `undefined`). */
-export async function buildCuaStatus(config: ResolvedConfig, signal?: AbortSignal): Promise<Record<string, unknown>> {
+export async function buildCuaStatus(config: ResolvedConfig, signal?: AbortSignal): Promise<Record<string, JsonValue>> {
   const status = readRuntimeStatus()
   const runtime = {
     ...status,
@@ -47,7 +48,7 @@ export async function buildCuaStatus(config: ResolvedConfig, signal?: AbortSigna
     hostedSession: config.sessionId,
     hint: statusHint(runtime.phase, runtime.hint, daemon.running === true, hostPermissions),
   }
-  return JSON.parse(JSON.stringify(value)) as Record<string, unknown>
+  return JSON.parse(JSON.stringify(value)) as Record<string, JsonValue>
 }
 
 function statusHint(

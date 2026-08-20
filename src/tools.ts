@@ -1,6 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import type { ToolDefinition } from '@deepseek-ai/dsh-tools'
+import type { JsonValue } from '@deepseek-ai/dsh-session'
 import { LOG } from './argv.ts'
 import type { ResolvedConfig } from './config.ts'
 import {
@@ -60,14 +61,14 @@ export function registerHostTools(ctx: Context, config: ResolvedConfig): void {
     execute() {
       const blocked = runtimeNotReady(config, 'list_tools')
       if (blocked) {
-        return Promise.resolve({
+        return Promise.resolve(jsonObject({
           tools: [],
           reason: 'runtime_not_ready',
           runtime: readRuntimeStatus(),
           text: blocked.text,
-        })
+        }))
       }
-      return Promise.resolve({ tools: listDriverTools(config) })
+      return Promise.resolve(jsonObject({ tools: listDriverTools(config) }))
     },
     presentCall: () => ({ card: 'generic', title: 'Cua list tools', kind: 'read' }),
   }))
@@ -86,19 +87,19 @@ export function registerHostTools(ctx: Context, config: ResolvedConfig): void {
     execute(args) {
       const blocked = runtimeNotReady(config, 'describe')
       if (blocked) {
-        return Promise.resolve({
+        return Promise.resolve(jsonObject({
           reason: 'runtime_not_ready',
           runtime: readRuntimeStatus(),
           text: blocked.text,
-        })
+        }))
       }
       const described = describeDriverTool(config, args.tool)
-      return Promise.resolve({
+      return Promise.resolve(jsonObject({
         name: described.name,
         dsh_tool: publicName(described.name),
         description: described.description,
         input_schema: described.inputSchema,
-      })
+      }))
     },
     presentCall: args => ({ card: 'generic', title: `Cua describe ${args.tool}`, kind: 'read', rawInput: args.tool }),
   }))
@@ -158,7 +159,7 @@ function driverToolDefinition(
     timeoutMs: config.timeoutMs,
     output: {
       schema: CUA_OUTPUT_JSON,
-      render: (args, value) => renderCuaValue(args, value as CuaCallValue),
+      render: (args, value) => renderCuaValue(args, value as unknown as CuaCallValue),
     },
     execute(args, exec) {
       const toolArgs = isPlainObject(args) ? args : {}
@@ -272,4 +273,8 @@ function actionKind(tool: string): 'read' | 'other' {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function jsonObject(value: unknown): Record<string, JsonValue> {
+  return JSON.parse(JSON.stringify(value)) as Record<string, JsonValue>
 }
