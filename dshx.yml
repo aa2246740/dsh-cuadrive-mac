@@ -1,0 +1,5 @@
+id: dsh-cuadrive-mac
+entry: src/dsh-cuadrive-mac.ts
+marker: "[my-plugins/dsh-cuadrive-mac] loaded"
+kind: tool
+profile: web

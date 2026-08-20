@@ -1,0 +1,5 @@
+# portable overlay: relative name only. --patch resolves against the profile
+# directory, so boot through `dshx start` / `dshx verify`, not raw pnpm dsh.
+- insert:
+    - id: dsh-cuadrive-mac
+      name: './src/dsh-cuadrive-mac.ts'
