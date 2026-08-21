@@ -4,13 +4,13 @@
 
 On a Mac, this gives the in-host agent its own hands: click windows, read the screen, drive apps. The engine is official [`cua-driver`](https://github.com/trycua/cua) **0.20.0**, pinned in `runtime-lock.json`, served on a **private socket**. It will not stop, rewrite, or hijack a machine-wide Cua install.
 
-macOS only. On Windows and Linux the plugin still loads, but it keeps the status tools and tells you it will not start computer-use. Unofficial.
+macOS only. Unofficial. The installable package is `dsh-cua-drive`. The repo stays `dsh-cuadrive-mac` so existing downloads, permissions, sockets, and sessions do not have to migrate.
 
-The installable package is `dsh-cua-drive`. The repo stays `dsh-cuadrive-mac` so existing downloads, permissions, sockets, and sessions do not have to migrate.
+## Mac shot TBD
 
-![Plugin load on Linux Cloud: computer-use stays down, private socket idle](docs/screenshots/linux-status.gif)
+**Mac shot TBD: one `cua_click` / screen attachment inside DSH.app.**
 
-This loop was recorded on **Linux Cloud**, not a Mac, and not a mock. GitHub uses frame 0 as the still: the plugin is already loaded and has printed `macOS only — computer-use is not started on linux`. The next beat calls `cua_status`, which refuses with `supports macOS only (got linux/x64)`.
+This docs environment is Linux Cloud. There is no Mac desktop here, so this slot stays empty. A real Mac recapture will land separately. Do not fill this slot with the Linux refuse still.
 
 ## Install
 
@@ -24,29 +24,13 @@ First Mac boot needs network once (GitHub Releases) to drop the pinned darwin-un
 
 Upgrading from the old `my-plugins` notes: delete the `dsh-cuadrive-mac` insert from the profile's `cordis.patch.yml`. The Bundle now owns that Loader row; keeping both copies duplicates the Loader id at boot.
 
-## Where these shots came from
+## Windows / Linux
 
-This machine is Linux Cloud (`linux/x64`). There is no Mac desktop here, so there is no invented macOS chrome. Every still is this checkout running on this VM: plugin load, `cua_status`, the host-only tool list, the pinned runtime lock, and the test that refuses non-darwin artifacts.
+Windows and Linux load only the status tools. Computer-use does not start.
 
-![Plugin load: macOS-only warning, computer-use not started, private socket idle](docs/screenshots/01-plugin-load.png)
+![cua_status on Linux: supports macOS only (got linux/x64)](docs/screenshots/linux-cua-status.png)
 
-After `apply`, the only product line that matters is macOS-only. The private socket path is already resolved (`$DSH_HOME/dsh-cuadrive-mac/run/driver.sock`) and stays idle — no `serve` on this host.
-
-![cua_status refuses on Linux: supports macOS only (got linux/x64)](docs/screenshots/02-cua-status.png)
-
-`cua_status` is the tool Windows / Linux actually keep. Here it throws the plugin's own platform error, plus the host-TCC hint: permission prompts are macOS-only too.
-
-![Linux registers only cua_status, cua_list_tools, cua_describe, cua_call](docs/screenshots/03-host-tools.png)
-
-Host tools stay: `cua_status`, `cua_list_tools`, `cua_describe`, `cua_call`. Driver tools (`cua_click`, `cua_get_window_state`, …) are not registered.
-
-![runtime-lock.json pins cua-driver 0.20.0 with a darwin-universal artifact only](docs/screenshots/04-runtime-lock.png)
-
-The lock file only knows darwin-universal. Plugin, driver, skill, and sha256 are stamped together. Linux and Windows have no artifact row.
-
-![Passing test: releaseArtifact throws on linux/win32 on purpose](docs/screenshots/05-linux-refuse-test.png)
-
-That throw is the contract. `releaseArtifact` refuses `linux` / `win32`; the test is written that way.
+That still is Linux Cloud, not the product hero. The Mac `cua_click` / screen-attachment shot belongs in the empty slot above.
 
 ## First launch on a Mac
 
