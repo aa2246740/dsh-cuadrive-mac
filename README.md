@@ -2,15 +2,11 @@
 
 # 给 DeepSeek Harness 自己的电脑操作运行时
 
-装上之后，DSH 里的 agent 就能在 Mac 上点窗口、读屏幕、操作 App。底层是官方 [`cua-driver`](https://github.com/trycua/cua) **0.20.0**（写死在 `runtime-lock.json`），跑在插件自己的私有 socket 上。机器上已经装着的 Cua 它不会去停、不会去改、也不会去劫持。
+只做 macOS。装上之后，DSH 里的 agent 用一份私有、钉死的 [`cua-driver`](https://github.com/trycua/cua) **0.20.0**（写死在 `runtime-lock.json`）点窗口、读屏幕、操作 App。跑在插件自己的 socket 上，不会停、改、或劫持机器上已有的 Cua。
 
-只做 macOS。非官方。包名是 `dsh-cua-drive`。仓库还叫 `dsh-cuadrive-mac`，已经下过的包、权限、socket、会话不用搬家。
+第一次启动会向**拉起 dsh 的那个进程**要辅助功能和屏幕录制。DSH.app 勾 DSH。命令行 `dsh web` 勾 Terminal / iTerm / Cursor / VS Code。Windows / Linux 只加载 `cua_status`，说明这是 macOS-only，不会下载驱动，也不会启动 computer-use。
 
-## Mac 真机画面待补
-
-**Mac 真机画面待补：DSH.app 里一次 `cua_click` / 屏幕附件。**
-
-这台文档环境是 Linux Cloud，没有 Mac 桌面，所以这里空着。真机画面会另补。不要用 Linux 拒绝画面填这个位置。
+非官方。包名是 `dsh-cua-drive`。仓库还叫 `dsh-cuadrive-mac`，已经下过的包、权限、socket、会话不用搬家。
 
 ## 安装
 
@@ -24,14 +20,6 @@ dsh plugin --profile web add github:aa2246740/dsh-cuadrive-mac#593da95209f755a9b
 
 从旧的 `my-plugins` 说明升级的：先把 profile 里 `cordis.patch.yml` 中的 `dsh-cuadrive-mac` 那一行删掉。现在由 Bundle 自己占 Loader，留两份会在启动时报重复 id。
 
-## Windows / Linux
-
-Windows/Linux 只加载状态工具，不会启动 computer-use.
-
-![Linux 上调用 cua_status：supports macOS only (got linux/x64)](docs/screenshots/linux-cua-status.png)
-
-上图拍自 Linux Cloud，不是产品主画面。Mac 上的 `cua_click` / 屏幕附件见上面的待补槽。
-
 ## 第一次在 Mac 上
 
 运行时起来之后，插件会用**真正拉起 dsh 的那个进程**去要辅助功能、屏幕录制：
@@ -44,6 +32,12 @@ Windows/Linux 只加载状态工具，不会启动 computer-use.
 不要跑 `cua-driver permissions grant`，那会去拉 `/Applications/CuaDriver.app`。看 `cua_status.hostPermissions.hostLabel`，勾那个名字。
 
 DSH 启动不等 GitHub。host tools 马上就能调。tarball 在后台用 `curl -C -` 续传。进度看 `cua_status` 的卡片标题（`Cua runtime 42%`），或者打开 `$DSH_HOME/dsh-cuadrive-mac/status.json` 和 `download.log`。
+
+## Windows / Linux
+
+Windows / Linux 只加载状态工具，不会启动 computer-use。下面这张图是 Linux 上的 `cua_status`，只说明非 Mac 不会动手。
+
+![Linux 上调用 cua_status：supports macOS only (got linux/x64)](docs/screenshots/linux-cua-status.png)
 
 ## 它怎么跟机器上的 Cua 分开
 
