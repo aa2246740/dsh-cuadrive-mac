@@ -19,6 +19,7 @@
     "cordis.patch.yml",
     "runtime-lock.json",
     "README.md",
+    "README.en.md",
     "LICENSE"
   ],
   "scripts": {
