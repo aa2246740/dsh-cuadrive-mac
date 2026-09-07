@@ -1,76 +1,58 @@
-[中文](README.md) · [English](README.en.md)
+[中文](README.md) · English
 
-# A computer-use runtime that belongs to DeepSeek Harness
+# dsh-cua-drive
 
-macOS only. On a Mac, the in-host agent clicks windows, reads the screen, and drives apps through a private, pinned [`cua-driver`](https://github.com/trycua/cua) **0.20.0** in `runtime-lock.json`, served on the plugin's own socket. It will not stop, rewrite, or hijack a machine-wide Cua install.
+macOS only. After install, the in-host agent uses a private, lock-pinned [`cua-driver`](https://github.com/trycua/cua) **0.20.0** (`runtime-lock.json`) to click windows, read the screen, and drive apps. It runs on this plugin's own socket and does not stop, change, or hijack a Cua install already on the machine.
 
-First launch asks for Accessibility and Screen Recording as **whatever launched dsh**. Grant DSH if you used DSH.app. Grant Terminal, iTerm, Cursor, or VS Code if you used `dsh web`. Windows and Linux load `cua_status` only. That tool explains this is macOS-only. It does not download a driver or start computer-use.
+First launch asks the process that started dsh for Accessibility and Screen Recording. DSH.app: grant **DSH**. CLI `dsh web`: grant Terminal / iTerm / Cursor / VS Code. Windows and Linux only load `cua_status` and say this is macOS-only. They do not download a driver or start computer-use.
 
-Unofficial. The installable package is `dsh-cua-drive`. The repo stays `dsh-cuadrive-mac` so existing downloads, permissions, sockets, and sessions do not have to migrate.
+The package name is `dsh-cua-drive`. The repo is still `dsh-cuadrive-mac`, so existing downloads, permissions, sockets, and sessions do not move.
 
 ## Install
 
-Pin a commit, restart DSH, open a **new** chat. Works with **DSH.app** and CLI `dsh web`. The repo ships built `lib/`, so a GitHub install does not run `prepare`.
+Pin a commit, restart DSH, open a new chat. The repo ships built `lib/`. A GitHub install does not run `prepare`.
 
 ```sh
 dsh plugin --profile web add github:aa2246740/dsh-cuadrive-mac#593da95209f755a9bfa43ab002c504f67f07c2cd
 ```
 
-First Mac boot needs network once (GitHub Releases) to drop the pinned darwin-universal tarball into `$DSH_HOME/dsh-cuadrive-mac/vendor/`. If GitHub is blocked, set `HTTPS_PROXY` / `ALL_PROXY` / plugin config `proxy`, or put the exact asset at `runtime.manualCachePath`. Do not run `cua-driver update`.
+The first Mac start needs network once, to pull the pinned darwin-universal tarball into `$DSH_HOME/dsh-cuadrive-mac/vendor/`. If that fails, set `HTTPS_PROXY` / `ALL_PROXY` / plugin config `proxy`, or drop the same tarball at `runtime.manualCachePath`. Do not run `cua-driver update`.
 
-Upgrading from the old `my-plugins` notes: delete the `dsh-cuadrive-mac` insert from the profile's `cordis.patch.yml`. The Bundle now owns that Loader row; keeping both copies duplicates the Loader id at boot.
+Upgrading from an old `my-plugins` install: delete the `dsh-cuadrive-mac` row from `cordis.patch.yml` first. The bundle now owns the Loader. Two copies fail boot with a duplicate id.
 
 ## First launch on a Mac
 
-Once the runtime is ready, the plugin asks for Accessibility and Screen Recording as **whatever launched dsh**:
-
-| How you run dsh | Who macOS lists / who to grant |
+| How you run dsh | Grant in System Settings |
 |---|---|
-| **DSH.app** | **DSH** |
-| **CLI** (`dsh web`, no app pack) | **Terminal / iTerm / Cursor / VS Code** — the parent app |
+| DSH.app | DSH |
+| CLI `dsh web` with no app pack | Terminal / iTerm / Cursor / VS Code, the parent app |
 
-Do not run `cua-driver permissions grant` (that launches `/Applications/CuaDriver.app`). `cua_status.hostPermissions.hostLabel` is the name to enable in System Settings.
+Do not run `cua-driver permissions grant`. That pulls `/Applications/CuaDriver.app`. Grant the name in `cua_status.hostPermissions.hostLabel`.
 
-DSH boot does not wait on GitHub. Host tools register immediately. The tarball downloads in the background with `curl -C -`. Watch `cua_status` (card title `Cua runtime 42%`), or open `$DSH_HOME/dsh-cuadrive-mac/status.json` and `download.log`.
+Progress is the `cua_status` card title, or `$DSH_HOME/dsh-cuadrive-mac/status.json` and `download.log`.
 
-## Windows / Linux
+Windows / Linux only load the status tool:
 
-Windows and Linux load only the status tools. Computer-use does not start. The still below is `cua_status` on Linux. Non-Mac hosts get that macOS-only status message, nothing else.
+![Linux cua_status: supports macOS only](docs/screenshots/linux-cua-status.png)
 
-![cua_status on Linux: supports macOS only (got linux/x64)](docs/screenshots/linux-cua-status.png)
-
-## It stays off the machine-wide Cua
-
-```
-$DSH_HOME/dsh-cuadrive-mac/
-  vendor/<driver>/   # private cua-driver, stamped to this plugin version
-  cache/             # resumable tarball
-  status.json
-  download.log
-  permissions.json
-  run/driver.sock    # DSH-only; not ~/.local/bin
-```
-
-Closing DSH only stops this socket. Other agents keep their own cua-driver. Files under `skill/` are the official pack for the locked driver. The catalog name stays `dsh-cuadrive-mac`. Agent tools stay `cua_*`.
-
-Why not `@deepseek-ai/dsh-mcp-client` alone? That client discards screenshot image blocks. This plugin calls the private `cua-driver --socket … call` and re-attaches PNGs through `ctx.attachments`.
+Private runtime lives under `$DSH_HOME/dsh-cuadrive-mac/`. Closing DSH stops only `run/driver.sock`. Tools exposed to the model stay named `cua_*`.
 
 ## Config
 
 | key | default | meaning |
 |---|---|---|
-| `binary` | (empty) | absolute override; empty = plugin vendor dir |
-| `ownDaemon` | `true` | private DSH socket |
-| `socketPath` | `$DSH_HOME/dsh-cuadrive-mac/run/driver.sock` | DSH-only serve socket |
-| `autoStart` | `true` | download + `serve --embedded` when the socket is down |
-| `proxy` | (empty) | HTTP(S) proxy for the GitHub download |
-| `promptPermissions` | `true` | first launch prompts as the dsh host |
-| `timeoutMs` | `90000` | per-call deadline |
-| `sessionId` | `dsh` | hosted session on the private daemon |
+| `binary` | empty | Absolute override. Empty uses the plugin vendor dir |
+| `ownDaemon` | `true` | Private DSH socket |
+| `socketPath` | `$DSH_HOME/dsh-cuadrive-mac/run/driver.sock` | Serve for DSH only |
+| `autoStart` | `true` | Download and `serve --embedded` if the socket is down |
+| `proxy` | empty | HTTP(S) proxy for GitHub downloads |
+| `promptPermissions` | `true` | Ask the host that launched dsh on first use |
+| `timeoutMs` | `90000` | Per-call timeout |
+| `sessionId` | `dsh` | Hosted session on the private daemon |
 
 ## Local development
 
-Clone anywhere outside the Harness repository and install from this directory:
+Clone outside the Harness repo, then in this directory:
 
 ```sh
 npm ci
@@ -80,4 +62,4 @@ npm run build
 dsh plugin --profile web add .
 ```
 
-MIT. Unofficial — not affiliated with DeepSeek or Cua.
+MIT.
