@@ -1,5 +1,5 @@
 import type { ContentBlock } from '@deepseek-ai/dsh-llm'
-import type { JsonValue } from '@deepseek-ai/dsh-session'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import type { JsonSchemaNode, ValueSchemaSpec } from '@deepseek-ai/dsh-tools'
 import { imageRefFromValue, type CuaImageValue } from './images.ts'
 

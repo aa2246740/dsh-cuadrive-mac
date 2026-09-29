@@ -1,5 +1,5 @@
 import type { ResolvedConfig } from './config.ts'
-import type { JsonValue } from '@deepseek-ai/dsh-session'
+import type { JsonValue } from '@deepseek-ai/dsh-util-values'
 import { readDaemonStatus, readDoctor, readPermissions, resolveBinary } from './driver.ts'
 import { permissionsHint, readHostPermissions } from './permissions.ts'
 import { readRuntimeStatus, resolvedProxy, runtimeAvailable } from './runtime.ts'
